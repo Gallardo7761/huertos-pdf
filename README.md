@@ -1,3 +1,1 @@
-# huertos-pdf
-
-PDF Generator for Huertos La Salud - Bellavista
+Web platform made in React&Spring for the Huertos La Salud - Bellavista Associaton (Seville). 

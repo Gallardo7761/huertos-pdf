@@ -1,0 +1,28 @@
+{
+  "name": "huertos-pdf",
+  "version": "1.0.0",
+  "description": "PDF Generator",
+  "repository": {
+    "type": "git",
+    "url": "git@miarma.net:Gallardo7761/huertos-pdf"
+  },
+  "license": "GPL-3.0-only",
+  "author": "Gallardo7761",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "@react-pdf/renderer": "^4.5.1",
+    "date-fns": "^4.1.0",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.5",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/register": "^7.29.3"
+  }
+}
