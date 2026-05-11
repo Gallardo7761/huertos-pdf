@@ -2,21 +2,11 @@ import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/
 import { CONSTANTS } from '../util/constants';
 import path from 'path';
 
-Font.register({
-  family: 'Open Sans',
-  fonts: [
-    {
-      src: path.resolve(__dirname, '../../fonts/OpenSans.ttf'),
-      fontWeight: 'normal'
-    }
-  ]
-});
-
 const styles = StyleSheet.create({
   page: {
     padding: 25,
     fontSize: 12,
-    fontFamily: 'Open Sans',
+    fontFamily: 'Helvetica',
     backgroundColor: '#F8F9FA',
   },
   headerContainer: {
