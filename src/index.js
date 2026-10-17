@@ -12,12 +12,12 @@ app.use(express.json());
 
 app.post('/socios', async (req, res) => {
     try {
-        const { socios } = req.body;
+        const { socios, filters } = req.body;
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=socios.pdf');
 
-        const stream = await renderToStream(React.createElement(SociosPDF, { socios }));
+        const stream = await renderToStream(React.createElement(SociosPDF, { socios, filters }));
         stream.pipe(res);
 
     } catch (error) {
@@ -28,12 +28,12 @@ app.post('/socios', async (req, res) => {
 
 app.post('/ingresos', async (req, res) => {
     try {
-        const { ingresos, year } = req.body;
+        const { ingresos, filters, summary } = req.body;
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=ingresos.pdf');
 
-        const stream = await renderToStream(React.createElement(IngresosPDF, { ingresos, year }));
+        const stream = await renderToStream(React.createElement(IngresosPDF, { ingresos, filters, summary }));
         stream.pipe(res);
 
     } catch (error) {
@@ -44,12 +44,12 @@ app.post('/ingresos', async (req, res) => {
 
 app.post('/gastos', async (req, res) => {
     try {
-        const { gastos, year } = req.body;
+        const { gastos, filters, summary } = req.body;
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=gastos.pdf');
 
-        const stream = await renderToStream(React.createElement(GastosPDF, { gastos, year }));
+        const stream = await renderToStream(React.createElement(GastosPDF, { gastos, filters, summary }));
         stream.pipe(res);
 
     } catch (error) {
@@ -60,12 +60,12 @@ app.post('/gastos', async (req, res) => {
 
 app.post('/balance', async (req, res) => {
     try {
-        const { balance } = req.body;
+        const { balance, year } = req.body;
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=balance.pdf');
 
-        const stream = await renderToStream(React.createElement(BalancePDF, { balance }));
+        const stream = await renderToStream(React.createElement(BalancePDF, { balance, year }));
         stream.pipe(res);
 
     } catch (error) {

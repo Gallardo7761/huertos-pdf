@@ -1,77 +1,112 @@
-import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
-import { format } from 'date-fns';
-import path from 'path';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Header, Footer, styles, formatCurrency, formatDateTime, COLORS } from './layout';
 
-Font.register({
-  family: 'Open Sans',
-  fonts: [
-    {
-      src: path.resolve(__dirname, '../../fonts/OpenSans.ttf'),
-      fontWeight: 'normal'
-    }
-  ]
-});
-
-const styles = StyleSheet.create({
-  page: {
-    padding: 25,
-    fontSize: 12,
-    fontFamily: 'Open Sans',
-    backgroundColor: '#F8F9FA',
-  },
-  headerContainer: {
+const local = StyleSheet.create({
+  kpis: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 25,
-    justifyContent: 'left',
+    marginBottom: 16
   },
-  logo: {
-    width: 60,
-    height: 60,
+  kpi: {
+    flexGrow: 1,
+    flexBasis: 0,
+    padding: 12,
+    marginRight: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.cream
   },
-  headerText: {
-    flexDirection: 'column',
-    marginLeft: 25,
+  kpiLabel: {
+    fontSize: 9,
+    fontWeight: 600,
+    color: COLORS.muted,
+    marginBottom: 3
   },
-  header: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#2C3E50',
+  kpiValue: {
+    fontFamily: 'Bricolage Grotesque',
+    fontWeight: 700,
+    fontSize: 18
   },
-  subHeader: {
-    fontSize: 12,
-    marginTop: 5,
-    color: '#34495E'
+  accounts: {
+    flexDirection: 'row'
   },
-  sectionTitle: {
-    fontSize: 16,
-    marginTop: 10,
-    marginBottom: 5,
-    color: '#2C3E50',
-    fontWeight: 'bold',
+  account: {
+    flexGrow: 1,
+    flexBasis: 0,
+    marginRight: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    overflow: 'hidden'
   },
-  row: {
+  accountHead: {
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    backgroundColor: COLORS.creamDark,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    fontFamily: 'Bricolage Grotesque',
+    fontWeight: 700,
+    fontSize: 14
+  },
+  line: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 4,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#D5D8DC',
+    borderBottomColor: COLORS.cream
   },
-  label: {
-    fontSize: 11,
-    color: '#566573',
+  lineLabel: {
+    color: COLORS.muted
   },
-  value: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#2C3E50'
+  lineValue: {
+    fontWeight: 600
+  },
+  final: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    margin: 10,
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: COLORS.cream
+  },
+  finalValue: {
+    fontFamily: 'Bricolage Grotesque',
+    fontWeight: 700,
+    fontSize: 16
+  },
+  updated: {
+    marginTop: 14,
+    fontSize: 8.5,
+    color: COLORS.muted
   }
 });
 
-const formatCurrency = (value) =>
-  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
+const Account = ({ title, initial, incomes, expenses, last = false }) => (
+  <View style={[local.account, last && { marginRight: 0 }]}>
+    <Text style={local.accountHead}>{title}</Text>
+    <View style={local.line}>
+      <Text style={local.lineLabel}>Saldo inicial</Text>
+      <Text style={local.lineValue}>{formatCurrency(initial)}</Text>
+    </View>
+    <View style={local.line}>
+      <Text style={local.lineLabel}>Ingresos</Text>
+      <Text style={[local.lineValue, { color: COLORS.primary }]}>+{formatCurrency(incomes)}</Text>
+    </View>
+    <View style={local.line}>
+      <Text style={local.lineLabel}>Gastos</Text>
+      <Text style={[local.lineValue, { color: COLORS.danger }]}>−{formatCurrency(expenses)}</Text>
+    </View>
+    <View style={local.final}>
+      <Text style={{ fontWeight: 600 }}>Saldo final</Text>
+      <Text style={local.finalValue}>{formatCurrency(initial + incomes - expenses)}</Text>
+    </View>
+  </View>
+);
 
-export const BalancePDF = ({ balance }) => {
+export const BalancePDF = ({ balance, year }) => {
   const {
     initialBank,
     initialCash,
@@ -86,34 +121,32 @@ export const BalancePDF = ({ balance }) => {
   const finalCash = initialCash + totalCashIncomes - totalCashExpenses;
 
   return (
-    <Document>
+    <Document title="Balance · eHuertos" author="Asociación Huertos La Salud – Bellavista">
       <Page size="A4" style={styles.page}>
-        <View style={styles.headerContainer}>
-          <Image src={path.resolve(__dirname, '../../images/logo.png')} style={styles.logo} />
-          <View style={styles.headerText}>
-            <Text style={styles.header}>Informe de Balance</Text>
-            <Text style={styles.subHeader}>Asociación Huertos La Salud - Bellavista • Generado el {new Date().toLocaleDateString()} a las {new Date().toLocaleTimeString()}</Text>
+        <Header title={year ? `Balance ${year}` : 'Balance'} />
+
+        <View style={local.kpis}>
+          <View style={[local.kpi, { backgroundColor: COLORS.primary, borderColor: COLORS.primary }]}>
+            <Text style={[local.kpiLabel, { color: COLORS.primarySoft }]}>Saldo total</Text>
+            <Text style={[local.kpiValue, { color: '#FFFFFF' }]}>{formatCurrency(finalBank + finalCash)}</Text>
+          </View>
+          <View style={local.kpi}>
+            <Text style={local.kpiLabel}>Ingresos</Text>
+            <Text style={[local.kpiValue, { color: COLORS.primary }]}>{formatCurrency(totalBankIncomes + totalCashIncomes)}</Text>
+          </View>
+          <View style={[local.kpi, { marginRight: 0 }]}>
+            <Text style={local.kpiLabel}>Gastos</Text>
+            <Text style={[local.kpiValue, { color: COLORS.danger }]}>{formatCurrency(totalBankExpenses + totalCashExpenses)}</Text>
           </View>
         </View>
 
-        <Text style={styles.sectionTitle}>Banco</Text>
-        <View style={styles.row}><Text style={styles.label}>Saldo inicial</Text><Text style={styles.value}>{formatCurrency(initialBank)}</Text></View>
-        <View style={styles.row}><Text style={styles.label}>Ingresos</Text><Text style={styles.value}>{formatCurrency(totalBankIncomes)}</Text></View>
-        <View style={styles.row}><Text style={styles.label}>Gastos</Text><Text style={styles.value}>{formatCurrency(totalBankExpenses)}</Text></View>
+        <View style={local.accounts}>
+          <Account title="Banco" initial={initialBank} incomes={totalBankIncomes} expenses={totalBankExpenses} />
+          <Account title="Caja" initial={initialCash} incomes={totalCashIncomes} expenses={totalCashExpenses} last />
+        </View>
 
-        <Text style={styles.sectionTitle}>Caja</Text>
-        <View style={styles.row}><Text style={styles.label}>Saldo inicial</Text><Text style={styles.value}>{formatCurrency(initialCash)}</Text></View>
-        <View style={styles.row}><Text style={styles.label}>Ingresos</Text><Text style={styles.value}>{formatCurrency(totalCashIncomes)}</Text></View>
-        <View style={styles.row}><Text style={styles.label}>Gastos</Text><Text style={styles.value}>{formatCurrency(totalCashExpenses)}</Text></View>
-
-        <Text style={styles.sectionTitle}>Total</Text>
-        <View style={styles.row}><Text style={styles.label}>Banco</Text><Text style={styles.value}>{formatCurrency(finalBank)}</Text></View>
-        <View style={styles.row}><Text style={styles.label}>Caja</Text><Text style={styles.value}>{formatCurrency(finalCash)}</Text></View>
-        <View style={styles.row}><Text style={styles.label}>Total</Text><Text style={styles.value}>{formatCurrency(finalBank + finalCash)}</Text></View>
-
-        <Text style={[styles.label, { marginTop: 20 }]}>
-          Última actualización: {format(new Date(createdAt), 'dd/MM/yyyy HH:mm')}
-        </Text>
+        {createdAt && <Text style={local.updated}>Última actualización: {formatDateTime(new Date(createdAt))}</Text>}
+        <Footer />
       </Page>
     </Document>
   );

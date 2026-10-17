@@ -1,137 +1,37 @@
-import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
-import path from 'path';
+import { Document, Page, Text, View } from '@react-pdf/renderer';
+import { Header, FilterChips, Table, Footer, styles, formatDate, formatName } from './layout';
 
-Font.register({
-  family: 'Open Sans',
-  fonts: [
-    {
-      src: path.resolve(__dirname, '../../fonts/OpenSans.ttf'),
-      fontWeight: 'normal'
-    }
-  ]
-});
-
-const styles = StyleSheet.create({
-  page: {
-    padding: 25,
-    fontSize: 14,
-    fontFamily: 'Open Sans',
-    backgroundColor: '#F8F9FA',
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 25,
-    justifyContent: 'left',
-  },
-  headerText: {
-    flexDirection: 'column',
-    justifyContent: 'left',
-    alignItems: 'center',
-    marginLeft: 25,
-  },
-  logo: {
-    width: 60,
-    height: 60,
-  },
-  header: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#2C3E50',
-    letterSpacing: 1.5,
-  },
-  subHeader: {
-    fontSize: 14,
-    marginTop: 5,
-    color: '#34495E'
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#3E8F5A',
-    fontWeight: 'bold',
-    paddingVertical: 8,
-    paddingHorizontal: 5,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-  },
-  headerCell: {
-    paddingHorizontal: 5,
-    color: '#ffffff',
-    fontWeight: 'bold',
-    fontSize: 12,
-  },
-  row: {
-    flexDirection: 'row',
-    paddingVertical: 6,
-    paddingHorizontal: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#D5D8DC'
-  },
-  cell: {
-    paddingHorizontal: 5,
-    fontSize: 9,
-    color: '#2C3E50'
-  }
-});
-
-const parseDate = (dateStr) => {
-  if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  return `${d}/${m}/${y}`;
+const TYPE_LABELS = {
+  0: 'Lista de espera',
+  1: 'Hortelano',
+  2: 'Hortelano + invern.',
+  3: 'Colaborador',
+  4: 'Subvención',
+  5: 'Informático'
 };
 
-export const SociosPDF = ({ socios }) => (
-  <Document>
+const COLUMNS = [
+  { label: 'Nº', flex: 0.55, style: styles.tdStrong, render: (s) => s?.metadata?.memberNumber },
+  { label: 'Huerto', flex: 0.75, render: (s) => (s?.metadata?.plotNumber > 0 ? s.metadata.plotNumber : '—') },
+  { label: 'Nombre', flex: 3, style: styles.tdStrong, render: (s) => formatName(s?.user?.displayName) },
+  { label: 'DNI', flex: 1.3, render: (s) => s?.metadata?.dni || '—' },
+  { label: 'Teléfono', flex: 1.3, render: (s) => s?.metadata?.phone || '—' },
+  { label: 'Correo', flex: 3, style: styles.tdMuted, render: (s) => s?.account?.email || '—' },
+  { label: 'Alta', flex: 1.2, render: (s) => formatDate(s?.metadata?.createdAt) },
+  { label: 'Tipo', flex: 1.7, render: (s) => TYPE_LABELS[s?.metadata?.type] ?? '—' },
+  { label: 'Estado', flex: 1, render: (s) => (s?.account?.status === 1 ? 'Activo' : 'Inactivo') }
+];
+
+export const SociosPDF = ({ socios = [], filters = [] }) => (
+  <Document title="Socios · eHuertos" author="Asociación Huertos La Salud – Bellavista">
     <Page size="A4" orientation="landscape" style={styles.page}>
-      <View style={styles.headerContainer}>
-        <Image src={path.resolve(__dirname, '../../images/logo.png')} style={styles.logo} />
-        <View style={styles.headerText}>
-          <Text style={styles.header}>Listado de socios</Text>
-          <Text style={styles.subHeader}>Asociación Huertos La Salud - Bellavista • Generado el {new Date().toLocaleDateString()} a las {new Date().toLocaleTimeString()}</Text>
-        </View>
+      <Header title="Socios" />
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <FilterChips filters={filters} />
+        <Text style={[styles.chipsLabel, { marginTop: 3 }]}>{socios.length} socios</Text>
       </View>
-
-      <View style={styles.tableHeader}>
-        <Text style={[styles.headerCell, { flex: 0.2 }]}>S</Text>
-        <Text style={[styles.headerCell, { flex: 0.2 }]}>H</Text>
-        <Text style={[styles.headerCell, { flex: 3 }]}>Nombre</Text>
-        <Text style={[styles.headerCell, { flex: 1 }]}>DNI</Text>
-        <Text style={[styles.headerCell, { flex: 1 }]}>Teléfono</Text>
-        <Text style={[styles.headerCell, { flex: 3 }]}>Email</Text>
-        <Text style={[styles.headerCell, { flex: 1 }]}>Alta</Text>
-        <Text style={[styles.headerCell, { flex: 1 }]}>Tipo</Text>
-      </View>
-
-      {socios.map((identity, idx) => (
-        <View
-          key={idx}
-          style={[
-            styles.row,
-            { backgroundColor: idx % 2 === 0 ? '#ECF0F1' : '#FDFEFE' },
-            { borderBottomLeftRadius: idx === socios.length - 1 ? 10 : 0 },
-            { borderBottomRightRadius: idx === socios.length - 1 ? 10 : 0 },
-          ]}
-        >
-          <Text style={[styles.cell, { flex: 0.2 }]}>{identity?.metadata?.memberNumber}</Text>
-          <Text style={[styles.cell, { flex: 0.2 }]}>{identity?.metadata?.plotNumber}</Text>
-          <Text style={[styles.cell, { flex: 3 }]}>{identity?.user?.displayName}</Text>
-          <Text style={[styles.cell, { flex: 1 }]}>{identity?.metadata?.dni}</Text>
-          <Text style={[styles.cell, { flex: 1 }]}>{identity?.metadata?.phone}</Text>
-          <Text style={[styles.cell, { flex: 3 }]}>{identity?.account?.email || ''}</Text>
-          <Text style={[styles.cell, { flex: 1 }]}>{parseDate(identity?.metadata?.createdAt?.split('T')[0] || '')}</Text>
-          <Text style={[styles.cell, { flex: 1 }]}>
-            {(() => {
-              switch (identity?.metadata?.type) {
-                case 0: return 'L. Espera';
-                case 1: return 'Hortelano';
-                case 2: return 'Invernadero';
-                case 3: return 'Colaborador';
-                default: return 'Desconocido';
-              }
-            })()}
-          </Text>
-        </View>
-      ))}
+      <Table columns={COLUMNS} rows={socios} emptyText="No hay socios con estos filtros." />
+      <Footer />
     </Page>
   </Document>
 );
