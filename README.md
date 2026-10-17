@@ -1,1 +1,1 @@
-Web platform made in React&Spring for the Huertos La Salud - Bellavista Associaton (Seville). 
+PDF Generator for Huertos La Salud - Bellavista 
